@@ -1,22 +1,17 @@
 
+#include <QObject>
 #include <QCoreApplication>
-
-#include <QLocale>
-#include <QTranslator>
+#include <cpp/qnasadownloader.h>
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    QTranslator translator;
-    const QStringList uiLanguages = QLocale::system().uiLanguages();
-    for (const QString &locale : uiLanguages) {
-        const QString baseName = "GPSSateliteDataDownloader_" + QLocale(locale).name();
-        if (translator.load(":/i18n/" + baseName)) {
-            a.installTranslator(&translator);
-            break;
-        }
-    }
+    QNasaDownloader *qnd = new QNasaDownloader("pz1c", "Pz1cpz!c");
+    QObject::connect(qnd, SIGNAL(finished(int)), qnd, SLOT(deleteLater()));
+    QObject::connect(qnd, SIGNAL(finished(int)), &a, SLOT(exit(int)));
+    qnd->getFile("https://cddis.nasa.gov/archive/gnss/data/daily/2023/brdc/brdc1150.23n.gz",
+                "brdc1150.23n.gz");
 
     return a.exec();
 }
